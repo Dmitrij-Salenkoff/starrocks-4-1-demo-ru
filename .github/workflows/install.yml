@@ -66,6 +66,12 @@ jobs:
         with:
           ref: ${{ needs.edition.outputs.revision }}
           persist-credentials: false
+      - name: Reserve runner disk for classroom tablets
+        if: runner.environment == 'github-hosted'
+        run: |
+          if [ -d /usr/local/lib/android/sdk ]; then
+            sudo rm -rf /usr/local/lib/android/sdk
+          fi
       - uses: astral-sh/setup-uv@v7
       - run: uv python install 3.14 && uv sync --locked
       - run: uv run --locked python smoke.py 01/01
