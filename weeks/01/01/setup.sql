@@ -19,6 +19,7 @@ DROP VIEW IF EXISTS case_v_gaps;
 DROP VIEW IF EXISTS case_v_postings;
 DROP VIEW IF EXISTS case_v_classified;
 DROP VIEW IF EXISTS case_v_variants;
+DROP VIEW IF EXISTS case_v_winners;
 DROP TABLE IF EXISTS case_statement;
 DROP TABLE IF EXISTS case_input;
 DROP TABLE IF EXISTS case_cutoffs;
@@ -64,18 +65,26 @@ INSERT INTO case_statement VALUES
     ('revised','B',8,'USD','capture',1400),('revised','C',7,'EUR','capture',500),
     ('revised','R',7,'USD','refund',-300),('revised','Q',8,'USD','capture',250);
 
+CREATE VIEW case_v_winners AS
+SELECT c.checkpoint,c.cutoff_utc,i.event_key,MAX(i.src_version) AS src_version
+FROM case_cutoffs c JOIN case_input i ON i.received_utc<c.cutoff_utc
+GROUP BY c.checkpoint,c.cutoff_utc,i.event_key;
+
 CREATE VIEW case_v_variants AS
-SELECT DISTINCT checkpoint,event_key,src_version,event_day,merchant_id,currency,entry_kind,amount_minor
-FROM (
-    SELECT c.checkpoint,i.*,DENSE_RANK() OVER (
-        PARTITION BY c.checkpoint,i.event_key ORDER BY i.src_version DESC
-    ) AS version_rank
-    FROM case_cutoffs c JOIN case_input i ON i.received_utc<c.cutoff_utc
-) ranked WHERE version_rank=1;
+SELECT w.checkpoint,i.event_key,i.src_version,i.event_day,i.merchant_id,
+       i.currency,i.entry_kind,i.amount_minor,COUNT(*) AS delivery_copies
+FROM case_v_winners w JOIN case_input i
+  ON i.event_key=w.event_key AND i.src_version=w.src_version AND i.received_utc<w.cutoff_utc
+GROUP BY w.checkpoint,i.event_key,i.src_version,i.event_day,i.merchant_id,
+         i.currency,i.entry_kind,i.amount_minor;
 
 CREATE VIEW case_v_classified AS
-SELECT v.*,COUNT(*) OVER (PARTITION BY checkpoint,event_key) AS variants
-FROM case_v_variants v;
+SELECT v.checkpoint,v.event_key,v.src_version,v.event_day,v.merchant_id,
+       v.currency,v.entry_kind,v.amount_minor,n.variants
+FROM case_v_variants v JOIN (
+    SELECT checkpoint,event_key,COUNT(*) AS variants
+    FROM case_v_variants GROUP BY checkpoint,event_key
+) n ON v.checkpoint=n.checkpoint AND v.event_key=n.event_key;
 
 CREATE VIEW case_v_postings AS
 SELECT checkpoint,event_key,merchant_id,currency,entry_kind,
