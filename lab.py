@@ -60,6 +60,31 @@ def ready() -> None:
     raise RuntimeError(f"StarRocks readiness timed out: {last}")
 
 
+def wait_for_setup_dependencies(folder: Path) -> None:
+    probe = folder / "setup_ready.sql"
+    if not probe.is_file():
+        return
+    statements = sqlparse.split(probe.read_text(encoding="utf-8"))
+    if len(statements) != 1:
+        raise ValueError(f"{probe} must contain one readiness query")
+    print(f"Waiting for {folder.name} setup dependencies ({probe.name})", flush=True)
+    deadline = time.monotonic() + 300
+    last = "probe has not completed"
+    while time.monotonic() < deadline:
+        try:
+            with connect() as conn, conn.cursor() as cur:
+                cur.execute("USE course")
+                cur.execute(statements[0])
+                rows = cur.fetchmany(2)
+                if len(rows) == 1 and len(rows[0]) == 1 and str(rows[0][0]) == "1":
+                    return
+                last = f"expected one scalar 1, received {rows!r}"
+        except pymysql.MySQLError as exc:
+            last = str(exc)
+        time.sleep(3)
+    raise RuntimeError(f"Setup readiness timed out for {probe}: {last}")
+
+
 def execute(folder: Path, stage: str) -> None:
     path = folder / f"{stage}.sql"
     statements = sqlparse.split(path.read_text(encoding="utf-8"))
@@ -126,6 +151,8 @@ def main() -> None:
                 parser.error("This lesson uses SQL only or a named experiment. Follow its README.")
             subprocess.run([sys.executable, str(driver)], cwd=ROOT, check=True)
         else:
+            if args.action == "setup":
+                wait_for_setup_dependencies(folder)
             execute(folder, args.action)
 
 
