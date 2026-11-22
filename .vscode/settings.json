@@ -1,1 +1,6 @@
-{"python.defaultInterpreterPath":"${workspaceFolder}/.venv","files.insertFinalNewline":true,"editor.rulers":[96]}
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  "files.insertFinalNewline": true,
+  "editor.rulers": [96],
+  "editor.wordWrap": "on"
+}

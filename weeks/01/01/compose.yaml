@@ -1,0 +1,20 @@
+name: sr41-0101
+services:
+  starrocks:
+    image: starrocks/allin1-ubuntu:4.1.4
+    ports:
+    - 127.0.0.1:9030:9030
+    - 127.0.0.1:8030:8030
+    - 127.0.0.1:8040:8040
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - mysql -h127.0.0.1 -P9030 -uroot -Nse 'SELECT 1'
+      start_period: 120s
+      interval: 8s
+      timeout: 6s
+      retries: 36
