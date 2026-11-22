@@ -63,7 +63,8 @@ def ready() -> None:
 def execute(folder: Path, stage: str) -> None:
     path = folder / f"{stage}.sql"
     statements = sqlparse.split(path.read_text(encoding="utf-8"))
-    if stage == "check" and len(statements) != 1:
+    is_check = stage in {"check", "advanced_check"}
+    if is_check and len(statements) != 1:
         raise ValueError(f"{path} must contain exactly one result-producing statement")
     with connect() as conn, conn.cursor() as cur:
         cur.execute("USE course")
@@ -80,7 +81,7 @@ def execute(folder: Path, stage: str) -> None:
                     print(" | ".join("NULL" if v is None else str(v) for v in row))
                 if len(rows) > 40:
                     print("…")
-            if stage == "check":
+            if is_check:
                 if not cur.description or len(rows) != 1 or len(rows[0]) != 1 or str(rows[0][0]) != "1":
                     raise RuntimeError("FAIL: the lab contract returned a value other than 1")
                 print("PASS")
@@ -90,7 +91,7 @@ def main() -> None:
     labs = sorted(p.parent for p in (ROOT / "weeks").glob("*/*/compose.yaml"))
     lessons = {p.relative_to(ROOT / "weeks").as_posix(): p for p in labs}
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["list", "up", "status", "logs", "setup", "run", "explore", "check", "down"])
+    parser.add_argument("action", choices=["list", "up", "status", "logs", "setup", "run", "explore", "check", "advanced", "down"])
     parser.add_argument("lesson", nargs="?", choices=lessons)
     args = parser.parse_args()
     if args.action == "list":
@@ -113,7 +114,13 @@ def main() -> None:
         compose(folder, "logs", "--tail", "100")
     else:
         verify_owner(folder)
-        if args.action == "run":
+        if args.action == "advanced":
+            if not (folder / "advanced.sql").is_file():
+                parser.error("This lesson uses a named experiment. Follow its README.")
+            execute(folder, "advanced")
+            if (folder / "advanced_check.sql").is_file():
+                execute(folder, "advanced_check")
+        elif args.action == "run":
             driver = folder / "run.py"
             if not driver.is_file():
                 parser.error("This lesson uses SQL only or a named experiment. Follow its README.")

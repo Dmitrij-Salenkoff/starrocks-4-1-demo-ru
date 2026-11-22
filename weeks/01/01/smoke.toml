@@ -1,0 +1,8 @@
+[[step]]
+python = ["advanced-check.py"]
+contains = "PASS: totals unchanged; reconciliation detected A, B, Q"
+
+[[step]]
+python = ["assessment.py", "--query", "weeks/01/01/starter.sql", "--seed", "11"]
+exit = 1
+contains = "mismatch seed 11"

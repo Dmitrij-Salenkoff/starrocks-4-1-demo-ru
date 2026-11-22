@@ -76,6 +76,9 @@ def main():
             lab("run")
         lab("explore")
         lab("check")
+        if (folder / "advanced.sql").is_file():
+            lab("advanced")
+            lab("check")
         check_experiment(folder, experiments.get("step", []))
     except BaseException:
         try:
