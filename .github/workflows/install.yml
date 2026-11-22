@@ -1,47 +1,67 @@
-name: Publish course edition
+name: Verify the public demo
 on:
   push:
-    paths: ['course-materials.zip', 'video-pack-*.zip', '.github/workflows/install.yml']
+    branches: [main]
+    paths: [demo-edition.zip]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
-  publish:
+  edition:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      revision: ${{ steps.revision.outputs.sha }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Expand this edition
-        shell: bash
+      - uses: actions/checkout@v6
+      - name: Install submitted weekly edition
+        if: github.event_name == 'push'
         run: |
           python - <<'PY'
-          import os, zipfile, pathlib
-          root = pathlib.Path.cwd()
-          bundles = list(root.glob('course-materials.zip')) + sorted(root.glob('video-pack-*.zip'))
-          for bundle in bundles:
-              with zipfile.ZipFile(bundle) as f:
-                  for item in f.namelist():
-                      path = pathlib.Path(item)
-                      assert not path.is_absolute() and not {'.git','.github','..'}.intersection(path.parts)
-                      if 'demo' in os.environ['GITHUB_REPOSITORY'] and path.parts[0] == 'lessons':
-                          assert path.parts[1] == '01'
-                  f.extractall(root)
-              bundle.unlink()
+          from pathlib import Path
+          from zipfile import ZipFile
+          import subprocess
+          archive = Path('demo-edition.zip')
+          with ZipFile(archive) as bundle:
+              entries = {Path(f.filename) for f in bundle.infolist() if not f.is_dir()}
+              allowed_roots = {'weeks','preview','.vscode','README.md','START.md','ENGINEERING.md','.gitignore','.python-version','pyproject.toml','uv.lock','lab.py','smoke.py'}
+              for p in entries:
+                  if p.is_absolute() or '..' in p.parts or p.parts[0] not in allowed_roots:
+                      raise ValueError(p)
+                  if any(x in str(p).lower() for x in ('instructor','solution','script.md','video.md')):
+                      raise ValueError(p)
+              assert [p for p in entries if p.name == 'compose.yaml'] == [Path('weeks/01/01/compose.yaml')]
+              assert all(p.parts[:3] == ('weeks','01','01') or p == Path('weeks/01/README.md') for p in entries if p.parts[0] == 'weeks')
+              assert {Path('README.md'), Path('weeks/01/01/check.sql'), Path('smoke.py')} <= entries
+              legacy = {'lessons','infra','tools','videos','verification','INSTRUCTOR.md','INSTRUCTOR.html'}
+              for name in subprocess.check_output(['git','ls-files','-z']).decode().split('\0'):
+                  if not name: continue
+                  p = Path(name)
+                  if p not in entries and p.parts[0] in legacy | allowed_roots:
+                      p.unlink(missing_ok=True)
+              bundle.extractall()
+          archive.unlink()
           PY
-          git add --all
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
           if ! git diff --cached --quiet; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Install course files on main'
-            git push
+            git commit -m "Publish the student demo and video"
+            git push origin HEAD:main
           fi
-      - name: Verify sample lesson with StarRocks
-        run: |
-          if [ ! -f lessons/01/compose.yaml ]; then exit 0; fi
-          pipx install uv
-          uv python install 3.14
-          uv sync --locked
-          cd lessons/01
-          docker compose up -d --wait
-          uv run --project ../.. python ../../tools/lab.py setup
-          uv run --project ../.. python ../../tools/lab.py solve
-          uv run --project ../.. python ../../tools/lab.py check
+      - name: Select revision
+        id: revision
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  test:
+    needs: edition
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.edition.outputs.revision }}
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v7
+      - run: uv python install 3.14 && uv sync --locked
+      - run: uv run --locked python smoke.py 01/01
