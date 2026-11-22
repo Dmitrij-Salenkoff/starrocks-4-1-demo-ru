@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:lang="ru" lang="ru" viewBox="0 0 1120 660" width="1120" height="660" role="img" aria-labelledby="title description">
+  <title id="title">Где StarRocks хранит данные</title>
+  <desc id="description">Пример слева: один FE планирует работу для двух BE. У каждого BE свой локальный диск. Справа: один FE и два CN. Оба CN обращаются к одному общему хранилищу S3 или HDFS. В лаборатории запускаются один FE и один BE в режиме shared-nothing, без CN.</desc>
+  <defs>
+    <marker id="worker-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 1 1 L 8 5 L 1 9" fill="none" stroke="#345f59" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="storage-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 1 1 L 8 5 L 1 9" fill="none" stroke="#a44e34" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect width="1120" height="660" fill="#f5f2e9"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="40" y="58" font-size="40" fill="#173c37" font-weight="700">Где StarRocks хранит данные</text>
+    <text x="42" y="94" font-size="21" fill="#203b37" font-weight="400">Один FE планирует запрос. Расположение постоянной копии данных зависит от режима.</text>
+    <rect x="30" y="122" width="514" height="390" rx="15" fill="#fffcf5" stroke="#bec9bc" stroke-width="1.4"/>
+    <text x="53" y="161" font-size="29" fill="#173c37" font-weight="700">shared-nothing</text>
+    <text x="53" y="188" font-size="17" fill="#45645c" font-weight="400">Пример с двумя BE</text>
+    <rect x="189" y="209" width="196" height="46" rx="9" fill="#194842"/>
+    <text x="287" y="239" font-size="20" fill="#fffaf0" font-weight="700" text-anchor="middle">FE · Frontend</text>
+    <path d="M 287 256 V 274" fill="none" stroke="#345f59" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 287 274 H 160 V 292" fill="none" stroke="#345f59" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#worker-arrow)"/>
+    <path d="M 287 274 H 414 V 292" fill="none" stroke="#345f59" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#worker-arrow)"/>
+    <rect x="60" y="297" width="200" height="53" rx="10" fill="#d7e9dc" stroke="#88a794" stroke-width="1.4"/>
+    <text x="160" y="330" font-size="22" fill="#173e38" font-weight="700" text-anchor="middle">BE 1</text>
+    <rect x="314" y="297" width="200" height="53" rx="10" fill="#d7e9dc" stroke="#88a794" stroke-width="1.4"/>
+    <text x="414" y="330" font-size="22" fill="#173e38" font-weight="700" text-anchor="middle">BE 2</text>
+    <path d="M 160 351 V 383" fill="none" stroke="#a44e34" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#storage-arrow)"/>
+    <path d="M 67 399 C 67 381, 253 381, 253 399 V 454 C 253 472, 67 472, 67 454 Z" fill="#f7e9dc" stroke="#a44e34" stroke-width="1.6"/>
+    <path d="M 67 399 C 67 414, 253 414, 253 399" fill="none" stroke="#a44e34" stroke-width="1.1"/>
+    <text x="160" y="431" font-size="18" fill="#643822" font-weight="700" text-anchor="middle">Диск BE 1</text>
+    <text x="160" y="454" font-size="16" fill="#643822" font-weight="400" text-anchor="middle">локальные данные</text>
+    <path d="M 414 351 V 383" fill="none" stroke="#a44e34" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#storage-arrow)"/>
+    <path d="M 321 399 C 321 381, 507 381, 507 399 V 454 C 507 472, 321 472, 321 454 Z" fill="#f7e9dc" stroke="#a44e34" stroke-width="1.6"/>
+    <path d="M 321 399 C 321 414, 507 414, 507 399" fill="none" stroke="#a44e34" stroke-width="1.1"/>
+    <text x="414" y="431" font-size="18" fill="#643822" font-weight="700" text-anchor="middle">Диск BE 2</text>
+    <text x="414" y="454" font-size="16" fill="#643822" font-weight="400" text-anchor="middle">локальные данные</text>
+    <rect x="576" y="122" width="514" height="390" rx="15" fill="#fffcf5" stroke="#bec9bc" stroke-width="1.4"/>
+    <text x="599" y="161" font-size="29" fill="#173c37" font-weight="700">shared-data</text>
+    <text x="599" y="188" font-size="17" fill="#45645c" font-weight="400">Пример с двумя CN</text>
+    <rect x="735" y="209" width="196" height="46" rx="9" fill="#194842"/>
+    <text x="833" y="239" font-size="20" fill="#fffaf0" font-weight="700" text-anchor="middle">FE · Frontend</text>
+    <path d="M 833 256 V 274" fill="none" stroke="#345f59" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 833 274 H 706 V 292" fill="none" stroke="#345f59" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#worker-arrow)"/>
+    <path d="M 833 274 H 960 V 292" fill="none" stroke="#345f59" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#worker-arrow)"/>
+    <rect x="606" y="297" width="200" height="53" rx="10" fill="#d7e9dc" stroke="#88a794" stroke-width="1.4"/>
+    <text x="706" y="330" font-size="22" fill="#173e38" font-weight="700" text-anchor="middle">CN 1</text>
+    <rect x="860" y="297" width="200" height="53" rx="10" fill="#d7e9dc" stroke="#88a794" stroke-width="1.4"/>
+    <text x="960" y="330" font-size="22" fill="#173e38" font-weight="700" text-anchor="middle">CN 2</text>
+    <path d="M 706 351 V 366 H 766 V 383" fill="none" stroke="#a44e34" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#storage-arrow)"/>
+    <path d="M 960 351 V 366 H 900 V 383" fill="none" stroke="#a44e34" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#storage-arrow)"/>
+    <path d="M 675 399 C 675 381, 991 381, 991 399 V 454 C 991 472, 675 472, 675 454 Z" fill="#f7e9dc" stroke="#a44e34" stroke-width="1.6"/>
+    <path d="M 675 399 C 675 414, 991 414, 991 399" fill="none" stroke="#a44e34" stroke-width="1.1"/>
+    <text x="833" y="431" font-size="18" fill="#643822" font-weight="700" text-anchor="middle">Общее хранилище</text>
+    <text x="833" y="454" font-size="16" fill="#643822" font-weight="400" text-anchor="middle">S3 или HDFS</text>
+    <rect x="30" y="535" width="1060" height="101" rx="12" fill="#e3ebdf" stroke="#a9bda9" stroke-width="1.4"/>
+    <text x="55" y="572" font-size="24" fill="#173e38" font-weight="700">Что запущено в лаборатории</text>
+    <text x="55" y="611" font-size="21" fill="#203b37" font-weight="400">1 FE  ·  1 BE с локальным диском  ·  0 CN</text>
+    <text x="635" y="610" font-size="19" fill="#284b40" font-weight="500" font-family="ui-monospace, Menlo, Consolas, monospace">@@run_mode = shared_nothing</text>
+  </g>
+</svg>

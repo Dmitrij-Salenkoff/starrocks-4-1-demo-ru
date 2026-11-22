@@ -1,4 +1,8 @@
 [[step]]
+python = ["architecture.py"]
+contains = "3 января: 6 чашек."
+
+[[step]]
 file = "today.sql"
 rows = [[6, 3, 2]]
 
@@ -13,6 +17,10 @@ contains = "До добавления чека: чашек: 8, чеков: 4, в
 [[step]]
 file = "today.sql"
 rows = [[8, 4, 2]]
+
+[[step]]
+python = ["architecture.py"]
+contains = "3 января: 8 чашек."
 
 [[step]]
 file = "check.sql"
