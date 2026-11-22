@@ -4,7 +4,7 @@
 
 **Инструменты:** StarRocks 4.1.4 · Docker Compose · Python 3.14 · uv · VS Code · DataGrip.
 
-[Подготовка рабочего места](START.md) · [Демовидео, 75 секунд](preview/demo.mp4) · [Субтитры](preview/demo.srt)
+[Подготовка рабочего места](START.md) · [Слайды демоурока (PDF)](weeks/01/01/slides.pdf)
 
 ## Пройти демоурок
 
