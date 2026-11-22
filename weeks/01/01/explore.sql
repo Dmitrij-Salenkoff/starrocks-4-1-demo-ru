@@ -1,10 +1,29 @@
-SHOW FRONTENDS;
-SHOW BACKENDS;
-SHOW PARTITIONS FROM sr_date_tenant;
-SHOW PARTITIONS FROM sr_event_hash;
-SHOW TABLET FROM sr_date_tenant;
-SHOW TABLET FROM sr_event_hash;
-EXPLAIN SELECT COUNT(*),SUM(cents) FROM sr_date_tenant WHERE event_day='2026-01-03' AND tenant_id=7;
-EXPLAIN SELECT COUNT(*),SUM(cents) FROM sr_event_hash WHERE event_day='2026-01-03' AND tenant_id=7;
-SELECT COUNT(*),SUM(cents) FROM sr_date_tenant WHERE event_day='2026-01-03' AND tenant_id=7;
-SELECT COUNT(*),SUM(cents) FROM sr_event_hash WHERE event_day='2026-01-03' AND tenant_id=7;
+-- Посмотрите чеки за оба дня.
+SELECT receipt_id, sale_day, coffee, cups
+FROM cafe_sales
+ORDER BY sale_day, receipt_id;
+
+-- Сколько чашек продали 3 января?
+SELECT SUM(cups) AS cups
+FROM cafe_sales
+WHERE sale_day = '2026-01-03';
+
+-- Сколько было чеков и видов кофе в этот день?
+SELECT SUM(cups) AS cups, COUNT(*) AS receipts, COUNT(DISTINCT coffee) AS coffee_types
+FROM cafe_sales
+WHERE sale_day = '2026-01-03';
+
+-- Как распределились чашки по напиткам?
+SELECT coffee, SUM(cups) AS cups
+FROM cafe_sales
+WHERE sale_day = '2026-01-03'
+GROUP BY coffee
+ORDER BY coffee;
+
+-- Сколько было продано вчера и за весь период?
+SELECT SUM(cups) AS yesterday_cups
+FROM cafe_sales
+WHERE sale_day = '2026-01-02';
+
+SELECT SUM(cups) AS all_cups
+FROM cafe_sales;
