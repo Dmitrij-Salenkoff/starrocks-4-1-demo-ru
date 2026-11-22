@@ -1,0 +1,47 @@
+name: Publish course edition
+on:
+  push:
+    paths: ['course-materials.zip', 'video-pack-*.zip', '.github/workflows/install.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Expand this edition
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, zipfile, pathlib
+          root = pathlib.Path.cwd()
+          bundles = list(root.glob('course-materials.zip')) + sorted(root.glob('video-pack-*.zip'))
+          for bundle in bundles:
+              with zipfile.ZipFile(bundle) as f:
+                  for item in f.namelist():
+                      path = pathlib.Path(item)
+                      assert not path.is_absolute() and not {'.git','.github','..'}.intersection(path.parts)
+                      if 'demo' in os.environ['GITHUB_REPOSITORY'] and path.parts[0] == 'lessons':
+                          assert path.parts[1] == '01'
+                  f.extractall(root)
+              bundle.unlink()
+          PY
+          git add --all
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Install course files on main'
+            git push
+          fi
+      - name: Verify sample lesson with StarRocks
+        run: |
+          if [ ! -f lessons/01/compose.yaml ]; then exit 0; fi
+          pipx install uv
+          uv python install 3.14
+          uv sync --locked
+          cd lessons/01
+          docker compose up -d --wait
+          uv run --project ../.. python ../../tools/lab.py setup
+          uv run --project ../.. python ../../tools/lab.py solve
+          uv run --project ../.. python ../../tools/lab.py check
