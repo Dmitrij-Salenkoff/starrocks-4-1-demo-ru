@@ -31,8 +31,12 @@ jobs:
                       raise ValueError(p)
                   if any(x in str(p).lower() for x in ('instructor','solution','script.md','video.md')):
                       raise ValueError(p)
-              assert [p for p in entries if p.name == 'compose.yaml'] == [Path('weeks/01/01/compose.yaml')]
+              expected = {Path('weeks/01/01')}
               assert all(p.parts[:3] == ('weeks','01','01') or p == Path('weeks/01/README.md') for p in entries if p.parts[0] == 'weeks')
+              for required in ('compose.yaml', 'slides.pdf', 'README.md', 'setup.sql', 'check.sql'):
+                  found = {p.parent for p in entries if p.name == required and len(p.parts) == 4}
+                  assert found == expected, (required, expected ^ found)
+              assert not any(p.suffix.lower() in {'.mp4','.mov','.mkv','.webm','.srt','.vtt'} for p in entries)
               assert {Path('README.md'), Path('weeks/01/01/check.sql'), Path('smoke.py')} <= entries
               legacy = {'lessons','infra','tools','videos','verification','INSTRUCTOR.md','INSTRUCTOR.html'}
               for name in subprocess.check_output(['git','ls-files','-z']).decode().split('\0'):
