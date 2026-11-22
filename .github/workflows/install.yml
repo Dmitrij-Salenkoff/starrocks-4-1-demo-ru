@@ -47,7 +47,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m "Publish the student demo and video"
+            git commit -m "Publish the demo lab and slide deck"
             git push origin HEAD:main
           fi
       - name: Select revision
