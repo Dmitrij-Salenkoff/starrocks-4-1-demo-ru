@@ -1,3 +1,7 @@
+[[before_run]]
+file = "investigate.sql"
+rows = [["espresso", 1, 1], ["latte", 2, 5]]
+
 [[step]]
 python = ["architecture.py"]
 contains = "3 января: 6 чашек."

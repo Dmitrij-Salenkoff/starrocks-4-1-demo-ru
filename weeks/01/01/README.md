@@ -105,3 +105,9 @@ uv run python lab.py down 01/01
 - Модели данных и устройство исполнения. [Возможности StarRocks](https://docs.starrocks.io/docs/introduction/Features/) · [Таблицы Primary Key](https://docs.starrocks.io/docs/table_design/table_types/primary_key_table/) · [EXPLAIN ANALYZE](https://docs.starrocks.io/docs/sql-reference/sql-statements/cluster-management/plan_profile/EXPLAIN_ANALYZE/)
 - Обращение к внешним таблицам и подготовка частых отчётов. [Внешние каталоги](https://docs.starrocks.io/docs/data_source/catalog/catalog_overview/) · [Асинхронные материализованные представления](https://docs.starrocks.io/docs/using_starrocks/async_mv/Materialized_view/)
 - Хранение, индексы и варианты аналитических продуктов. [PostgreSQL: страницы](https://www.postgresql.org/docs/current/storage-page-layout.html) · [Индексы PostgreSQL](https://www.postgresql.org/docs/current/indexes-intro.html) · [DuckDB](https://duckdb.org/why_duckdb) · [ClickHouse](https://clickhouse.com/docs/get-started/about/intro) · [BigQuery](https://docs.cloud.google.com/bigquery/docs/introduction)
+
+## Дополнительный эксперимент
+
+Управляющий просит тот же отчёт за 3 января, но отдельно по напиткам. По исходным чекам предскажите, сколько строк появится в результате и почему итог по чашкам сохранится. Выполните запрос, затем выделите его в DataGrip и посмотрите план через EXPLAIN. Какое дополнительное поле нужно прочитать?
+
+[Запрос для DataGrip](investigate.sql)
